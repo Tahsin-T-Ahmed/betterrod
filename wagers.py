@@ -493,10 +493,34 @@ def handle_load_btn():
             "table": [table_total, table_spread],
             "wager": [wager_total, wager_spread]
         }, index = ["total", "spread"])
+
         
-        st.write(f"FAVORITE: {teams_df.loc[market_fav_idx, "NAME"].item()}")
+
+        def highlight_fav(row):
+            if row["NAME"] == tr_fav_name:
+                return ["background-color: green"] * len(row)
+            else:
+                return [""] * len(row)
+        
+        st.markdown(f"##### :green[FAVORITE: {teams_df.loc[market_fav_idx, "NAME"].item()}] (by {market_spread})")
         st.write(f"UNDERDOG: {teams_df.loc[underdog_idx, "NAME"].item()}")
-        st.dataframe(teams_df.round(2), hide_index = True)
+        st.write("Stats:")
+        st.dataframe(
+            teams_df[["NAME", "PLACE", "OFF", "DEF", "TEM"]].round(2).style.apply(
+                highlight_fav,
+                axis=1
+            ), 
+            hide_index = True)
+
+        st.write("Projections:")        
+        st.dataframe(
+            teams_df[["NAME", "J_PROJ", "M_PROJ", "R_PROJ"]].round(2).style.apply(
+                highlight_fav, 
+                axis=1
+            ), 
+            hide_index = True
+        )
+
             
         st.write(f"PROJ PACE: {projected_tem.round(2)}")
 
