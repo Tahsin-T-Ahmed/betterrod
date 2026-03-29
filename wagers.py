@@ -1,5 +1,4 @@
 from bs4 import BeautifulSoup
-from datetime import datetime
 import numpy as np
 import pandas as pd
 import requests
@@ -34,11 +33,6 @@ sport_details = {
         }
     }
 }
-
-today = datetime.today()
-formatted_date = f"{today.year}-{today.month:02d}-{today.day:02d}"
-
-time_now = datetime.now()
 
 def adjust_stat(
     avg:float, avg_pct:float, 
@@ -105,22 +99,22 @@ target_sport = st.selectbox(
 )
 
 def handle_load_btn():
-    URL = f"{sport_details[target_sport]["url"]["schedule"]}?date={formatted_date}"
+    URL = f"{sport_details[target_sport]["url"]["schedule"]}"
 
     response = requests.get(URL)
     games_soup = BeautifulSoup(response.text, "html.parser")
     matches = games_soup.find("tbody").find_all("tr")
 
     # loading score pages
-    off_url = f"{sport_details[target_sport]["url"]["off_eff"]}?date={formatted_date}"
+    off_url = f"{sport_details[target_sport]["url"]["off_eff"]}"
     off_response = requests.get(off_url)
     off_soup =  BeautifulSoup(off_response.text, "html.parser")
 
-    def_url = f"{sport_details[target_sport]["url"]["def_eff"]}?date={formatted_date}"
+    def_url = f"{sport_details[target_sport]["url"]["def_eff"]}"
     def_response = requests.get(def_url)
     def_soup = BeautifulSoup(def_response.text, "html.parser")
 
-    tem_url = f"{sport_details[target_sport]["url"]["pos_per_game"]}?date={formatted_date}"
+    tem_url = f"{sport_details[target_sport]["url"]["pos_per_game"]}"
     tem_response = requests.get(tem_url)
     tem_soup = BeautifulSoup(tem_response.text, "html.parser")
 
@@ -165,14 +159,6 @@ def handle_load_btn():
         cells = match_row.find_all("td")
         match = cells[2].find("a")
         match_time_raw = cells[3].text.strip()
-        match_time_tgt = datetime.strptime(
-            match_time_raw, 
-            "%I:%M %p"
-        ).replace(
-            year = time_now.year,
-            month = time_now.month,
-            day = time_now.day
-        )
 
         match_link = f"{website}{match['href']}"
 
@@ -185,10 +171,6 @@ def handle_load_btn():
 
         st.markdown(f"#### :red[MATCH #{match_idx+1}/{n_matches}] ({match_time_raw})")
         st.markdown(f"#### [{title.text.split(':')[0].upper()}]({match_link})")
-        
-        if match_time_tgt < time_now:
-            st.write("Too late to place bet")
-            continue
 
         neutral = None
 
